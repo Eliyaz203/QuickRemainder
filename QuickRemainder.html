@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customizable Daily Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4c3;
+            color: #33691e;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-top: 30px;
+        }
+        .reminder {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .timer {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #558b2f;
+        }
+        .time-settings, .music-settings {
+            margin-top: 30px;
+            font-size: 1.2em;
+        }
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #aed581;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-top: 10px;
+            background-color: #689f38;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #558b2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Customizable Daily Reminder</h1>
+    <p>Set up to five reminders for the day and choose your ringtone!</p>
+
+    <div class="time-settings">
+        <p>Enter your reminder times (HH:MM format, 24-hour clock):</p>
+        <input type="time" id="time1">
+        <input type="time" id="time2">
+        <input type="time" id="time3">
+        <input type="time" id="time4">
+        <input type="time" id="time5">
+        <br>
+        <button onclick="setReminderTimes()">Set Reminders</button>
+    </div>
+
+    <div class="music-settings">
+        <p>Select a ringtone file:</p>
+        <input type="file" id="musicFile" accept="audio/*">
+        <button onclick="setMusic()">Set Ringtone</button>
+    </div>
+
+    <div class="reminder" id="reminderMessage">No reminder set yet.</div>
+    <div class="timer" id="currentTime"></div>
+
+    <!-- Default audio element -->
+    <audio id="reminderSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+    <script>
+        let reminderTimes = [];
+        const reminderSound = document.getElementById('reminderSound');
+
+        // Function to set reminder times from user input
+        function setReminderTimes() {
+            const timeInputs = [
+                document.getElementById('time1').value,
+                document.getElementById('time2').value,
+                document.getElementById('time3').value,
+                document.getElementById('time4').value,
+                document.getElementById('time5').value
+            ];
+            // Filter out empty inputs
+            reminderTimes = timeInputs.filter(time => time !== "");
+            if (reminderTimes.length > 0) {
+                document.getElementById('reminderMessage').innerText = `Reminders set for: ${reminderTimes.join(", ")}`;
+            } else {
+                document.getElementById('reminderMessage').innerText = "No reminders set.";
+            }
+        }
+
+        // Function to set custom ringtone for reminders
+        function setMusic() {
+            const musicFile = document.getElementById('musicFile').files[0];
+            if (musicFile) {
+                const musicURL = URL.createObjectURL(musicFile);
+                reminderSound.src = musicURL; // Set the custom music as the source
+                alert('Custom ringtone set successfully!');
+            } else {
+                alert('No music file selected. Default ringtone will be used.');
+            }
+        }
+
+        // Function to update the current time display and check reminders
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTime = `${hours}:${minutes}`;
+            document.getElementById('currentTime').innerText = `Current Time: ${currentTime}`;
+
+            // Check if it's time for a reminder
+            if (reminderTimes.includes(currentTime)) {
+                playRingtone(); // Play the ringtone
+                // Remove the current time from reminders to avoid multiple plays
+                reminderTimes = reminderTimes.filter(time => time !== currentTime);
+            }
+        }
+
+        // Function to play ringtone and stop after 30 seconds
+        function playRingtone() {
+            reminderSound.play(); // Start playing the ringtone
+            setTimeout(() => {
+                reminderSound.pause(); // Stop the ringtone after 30 seconds
+                reminderSound.currentTime = 0; // Reset the playback position
+            }, 30000); // 30,000 milliseconds = 30 seconds
+        }
+
+        // Update the time every second
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
